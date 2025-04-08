@@ -59,7 +59,7 @@ const HomeScreen = () => {
               <View style={styles.cardContent}>
                 <Text style={styles.featureTitle}>Histórico de Datos</Text>
                 <Text style={styles.featureText}>
-                  Accede a reportes detallados y análisis de patrones de uso
+                  Accede a reportes detallados y análisis de patrones de uso mediante nuestra plataforma web
                 </Text>
               </View>
             </View>

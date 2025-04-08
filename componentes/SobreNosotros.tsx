@@ -3,10 +3,10 @@ import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomNavigation from './BottomNavBar'; // Asegúrate de que la ruta sea correcta
 const teamMembers = [
-  { name: 'Robert Agustín Zavaleta', image: require('../assets/roberto.jpeg') },
-  { name: 'Jose Maria Cano Cruz', image: require('../assets/chema.jpeg') },
-  { name: 'Liliana Leticia Pérez del Ángel', image: require('../assets/lili.jpeg') },
-  { name: 'Rita Yamelit Gomez Gutierrez', image: require('../assets/rita.jpeg') }
+  { name: 'Robert Agustín Zavaleta', image: require('../assets/RobertDev.jpg') },
+  { name: 'Jose Maria Cano Cruz', image: require('../assets/ChemaDev.jpg') },
+  { name: 'Liliana Leticia Pérez del Ángel', image: require('../assets/LiliDev.jpg') },
+  { name: 'Rita Yamelit Gomez Gutierrez', image: require('../assets/YamelitDev.jpg') }
 ];
 
 

@@ -48,7 +48,7 @@ const LoginScreen = () => {
       if (user.rol === "admin") {
         navigation.navigate("Contenedores"); // Crear o configurar componente admin
       } else if (user.rol === "normal") {
-        navigation.navigate("Home");
+        navigation.navigate("ContenedoresUser");
       } else {
         Alert.alert("Error", "Rol no reconocido");
       }

@@ -66,7 +66,7 @@ export default function Contacto() {
         <Text style={styles.title}>Contáctanos</Text>
         <Text style={styles.subtitle}>Déjanos tus datos y nos pondremos en contacto contigo para brindarte acceso al sistema.</Text>
 
-        <TextInput style={styles.input} placeholder="Nombre" value={nombre} onChangeText={setNombre} />
+        <TextInput style={styles.input} placeholder="Nombre" value={nombre} onChangeText={setNombre} maxLength={10} />
 
         <TextInput style={styles.input} placeholder="Correo" value={correo} onChangeText={setCorreo} keyboardType="email-address" />
         {errores.correo !== '' && <Text style={styles.errorText}>{errores.correo}</Text>}
@@ -90,6 +90,7 @@ export default function Contacto() {
           <Text style={styles.footerDesc}>Sistema inteligente de monitoreo de residuos mediante IoT y análisis de datos.</Text>
 
           <View style={styles.contactInfo}>
+            {/**PONER LIMITE DE LETRAS */}
             <FontAwesome name="envelope" size={20} color="#fff" />
             <Text style={styles.contactText} onPress={() => Linking.openURL('mailto:betoazhueyapa@gmail.com')}> betoazhueyapa@gmail.com</Text>
           </View>

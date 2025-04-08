@@ -6,37 +6,76 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
+  Modal,
+  TextInput,
 } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
+import BottomNavigationAdmin from "./BotonNavAdmin";
+
+const API_URL = "https://api-rest-bin-tracker.onrender.com/api/contenedor";
 
 export default function GestionContenedores() {
   const [contenedores, setContenedores] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [editing, setEditing] = useState<any>(null);
 
   useEffect(() => {
-    const obtenerContenedores = async () => {
-      try {
-        const res = await axios.get("https://api-rest-bin-tracker.onrender.com/api/contenedor");
-        setContenedores(res.data);
-      } catch (error) {
-        console.error("Error al obtener contenedores:", error);
-      } finally {
-        setCargando(false);
-      }
-    };
-
     obtenerContenedores();
   }, []);
 
+  const obtenerContenedores = async () => {
+    try {
+      setCargando(true);
+      const res = await axios.get(API_URL);
+      setContenedores(res.data);
+    } catch (error) {
+      console.error("Error al obtener contenedores:", error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const eliminarContenedor = async (matricula: string) => {
+    Alert.alert("Confirmar", "¿Estás seguro de eliminar este contenedor?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await axios.delete(`${API_URL}/${matricula}`);
+            obtenerContenedores();
+          } catch (error) {
+            Alert.alert("Error", "No se pudo eliminar el contenedor.");
+          }
+        },
+      },
+    ]);
+  };
+
+  const guardarCambios = async () => {
+    if (!editing) return;
+
+    try {
+      const { matricula, nombreZona, configSensor } = editing;
+      await axios.put(`${API_URL}/${matricula}`, {
+        nombreZona,
+        configSensor,
+      });
+      setEditing(null);
+      obtenerContenedores();
+    } catch (error) {
+      Alert.alert("Error", "No se pudo guardar la edición.");
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>Gestión de contenedores</Text>
+        <Text style={styles.headerText}>Gestión de Contenedores</Text>
       </View>
-
-      {/* Lista de contenedores */}
       {cargando ? (
         <ActivityIndicator size="large" color="green" style={{ marginTop: 20 }} />
       ) : (
@@ -44,45 +83,113 @@ export default function GestionContenedores() {
           {contenedores.map((container: any, index) => (
             <View key={index} style={styles.card}>
               <Text style={styles.cardTitle}>Matrícula: {container.matricula}</Text>
-              <Text style={styles.cardText}>
-                <Text style={styles.bold}>Zona:</Text> {container.nombreZona}
-              </Text>
-              <Text style={styles.cardText}>
-                <Text style={styles.bold}>Tipo:</Text> {container.tipoContenedor}
-              </Text>
-              <Text style={styles.cardText}>
-                <Text style={styles.bold}>Ubicación:</Text>{" "}
-                Lat {container.ubicacion.lat}, Lng {container.ubicacion.lng}
-              </Text>
-              <Text style={styles.cardText}>
-                <Text style={styles.bold}>Distancia Min:</Text> {container.configSensor.distanciaMin} cm
-              </Text>
-              <Text style={styles.cardText}>
-                <Text style={styles.bold}>Distancia Max:</Text> {container.configSensor.distanciaMax} cm
-              </Text>
-              <Text style={styles.cardText}>
-                <Text style={styles.bold}>Temp. Máx:</Text> {container.configSensor.temperaturaMax} °C
-              </Text>
+              <Text style={styles.cardText}>Zona: {container.nombreZona}</Text>
+              <Text style={styles.cardText}>Tipo: {container.tipoContenedor}</Text>
+              <Text style={styles.cardText}>Distancia Min: {container.configSensor?.distanciaMin} cm</Text>
+              <Text style={styles.cardText}>Distancia Max: {container.configSensor?.distanciaMax} cm</Text>
+              <Text style={styles.cardText}>Temp. Máx: {container.configSensor?.temperaturaMax} °C</Text>
+
+              <View style={{ flexDirection: "row", marginTop: 10 }}>
+                <TouchableOpacity
+                  onPress={() =>
+                    setEditing({
+                      ...container,
+                      configSensor: {
+                        distanciaMin: container.configSensor?.distanciaMin ?? 10,
+                        distanciaMax: container.configSensor?.distanciaMax ?? 40,
+                        temperaturaMax: container.configSensor?.temperaturaMax ?? 35,
+                      },
+                    })
+                  }
+                  style={{ marginRight: 10 }}
+                >
+                  <MaterialIcons name="edit" size={24} color="green" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => eliminarContenedor(container.matricula)}>
+                  <MaterialIcons name="cancel" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
             </View>
           ))}
         </ScrollView>
       )}
 
-      {/* Navegación inferior */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navButton}>
-          <FontAwesome name="home" size={24} color="green" />
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <FontAwesome name="product-hunt" size={24} color="green" />
-          <Text style={styles.navText}>Producto</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <FontAwesome name="phone" size={24} color="green" />
-          <Text style={styles.navText}>Contacto</Text>
-        </TouchableOpacity>
-      </View>
+      {editing !== null && (
+        <Modal visible transparent animationType="slide">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Editar Contenedor</Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Zona"
+                value={editing.nombreZona}
+                onChangeText={(text) => setEditing({ ...editing, nombreZona: text })}
+              />
+
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Distancia Min"
+                value={editing.configSensor.distanciaMin?.toString() ?? ""}
+                onChangeText={(text) =>
+                  setEditing({
+                    ...editing,
+                    configSensor: {
+                      ...editing.configSensor,
+                      distanciaMin: parseFloat(text),
+                    },
+                  })
+                }
+              />
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Distancia Max"
+                value={editing.configSensor.distanciaMax?.toString() ?? ""}
+                onChangeText={(text) =>
+                  setEditing({
+                    ...editing,
+                    configSensor: {
+                      ...editing.configSensor,
+                      distanciaMax: parseFloat(text),
+                    },
+                  })
+                }
+              />
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Temperatura Máx"
+                value={editing.configSensor.temperaturaMax?.toString() ?? ""}
+                onChangeText={(text) =>
+                  setEditing({
+                    ...editing,
+                    configSensor: {
+                      ...editing.configSensor,
+                      temperaturaMax: parseFloat(text),
+                    },
+                  })
+                }
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={styles.saveButton} onPress={guardarCambios}>
+                  <Text style={styles.buttonText}>Guardar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setEditing(null)}
+                >
+                  <Text style={styles.buttonText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      <BottomNavigationAdmin />
     </View>
   );
 }
@@ -103,22 +210,43 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
   },
   cardTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 5 },
   cardText: { fontSize: 14, color: "#333", marginBottom: 3 },
-  bold: { fontWeight: "bold", color: "#000" },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
     alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
-    paddingVertical: 10,
-    backgroundColor: "#f9f9f9",
   },
-  navButton: { alignItems: "center" },
-  navText: { fontSize: 12, color: "green", marginTop: 3 },
+  modalContent: {
+    width: "85%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+  },
+  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 8,
+    marginBottom: 10,
+  },
+  modalButtons: { flexDirection: "row", justifyContent: "space-between" },
+  saveButton: {
+    backgroundColor: "green",
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginRight: 5,
+  },
+  cancelButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginLeft: 5,
+  },
+  buttonText: { color: "white", textAlign: "center", fontWeight: "bold" },
 });

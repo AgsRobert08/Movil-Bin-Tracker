@@ -14,7 +14,7 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import BottomNavigation from "../componentes/BottomNavBar";
+import BottomNavigationAdmin from "./BotonNavAdmin";  
 
 const API_URL = "https://api-rest-bin-tracker.onrender.com/api/usuarios";
 
@@ -103,10 +103,6 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <FontAwesome name="user-circle" size={35} color="green" style={styles.icon} />
-        <Text style={styles.title}>Gestión de Usuarios</Text>
-      </View>
 
       <Text style={[styles.title, { color: "#3bbdbb" }]}>Usuarios</Text>
 
@@ -122,7 +118,7 @@ export default function App() {
           keyExtractor={(item) => item.matricula}
           renderItem={({ item }) => (
             <View style={styles.userCard}>
-              <Image source={require("../assets/user1.jpg")} style={styles.avatar} />
+              <Image source={require("../assets/user-bg.png")} style={styles.avatar} />
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>{item.nombreCompleto}</Text>
                 <Text>{item.telefono}</Text>
@@ -186,13 +182,13 @@ export default function App() {
         </Modal>
       )}
 
-      <BottomNavigation />
+      <BottomNavigationAdmin />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, marginTop: 30 },
   header: {
     flexDirection: "row",
     alignItems: "center",

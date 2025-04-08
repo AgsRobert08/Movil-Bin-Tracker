@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
+    padding: 10,
     backgroundColor: "white",
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
